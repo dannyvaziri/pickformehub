@@ -14,7 +14,7 @@ Environment variables:
 
 - `AMAZON_ASSOCIATE_TAG=pickformehub-20`
 - `GEMINI_API_KEY=<your free-tier Gemini key>`
-- `GEMINI_MODEL=gemini-2.5-flash`
+- `GEMINI_MODEL=gemini-3.8-flash`
 
 The Gemini key must be stored only in Hostinger environment settings. Never commit it to GitHub.
 
