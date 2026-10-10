@@ -54,7 +54,7 @@ async function requestGroq(prompt) {
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${process.env.GROQ_API_KEY}` },
-    body: JSON.stringify({ model: groqModel, messages: [{ role: "user", content: prompt }], tools: [{ type: "browser_search" }], tool_choice: "required", response_format: { type: "json_object" }, temperature: 0.2, max_completion_tokens: 1200 }),
+    body: JSON.stringify({ model: groqModel, messages: [{ role: "user", content: prompt }], tools: [{ type: "browser_search" }], tool_choice: "required", temperature: 0.2, max_completion_tokens: 1200 }),
   });
   const payload = await response.json();
   if (!response.ok) throw new Error(payload?.error?.message || "Groq research request failed");
@@ -66,7 +66,7 @@ async function requestOpenRouter(prompt) {
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, "HTTP-Referer": "https://pickformehub.com", "X-Title": "PickForMeHub" },
-    body: JSON.stringify({ model: openRouterModel, messages: [{ role: "user", content: prompt }], tools: [{ type: "openrouter:web_search" }], response_format: { type: "json_object" }, temperature: 0.2, max_tokens: 1200 }),
+    body: JSON.stringify({ model: openRouterModel, messages: [{ role: "user", content: prompt }], tools: [{ type: "openrouter:web_search" }], temperature: 0.2, max_tokens: 1200 }),
   });
   const payload = await response.json();
   if (!response.ok) throw new Error(payload?.error?.message || "OpenRouter research request failed");
