@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Tell PickForMeHub what you want to buy and get three evidence-backed Amazon picks." />
+    <title>PickForMeHub — Find Your Best Amazon Pick</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="nav"><a class="brand" href="/">PICK<span>FOR</span>ME</a><span class="nav-note">Research first. Pick faster.</span></header>
+    <main>
+      <section class="hero">
+        <p class="eyebrow">AMAZON BUYING RESEARCH</p>
+        <h1>Tell us what you need.<br /><em>We’ll find your pick.</em></h1>
+        <p class="lede">Describe the product, budget, and person you’re shopping for. Our research assistant checks current information and returns three clear Amazon options.</p>
+        <form id="research-form" class="search-card">
+          <label for="query">What are you trying to buy?</label>
+          <textarea id="query" maxlength="500" placeholder="Best noise-canceling headphones under $200 for a frequent flyer" required></textarea>
+          <div class="form-row"><div class="chips"><button type="button" data-query="Best laptop for college under $900">Laptop under $900</button><button type="button" data-query="Best air fryer for a family of four">Air fryer for a family</button><button type="button" data-query="Best office chair for long work days">Office chair</button></div><button class="primary" type="submit">Find my picks <span>→</span></button></div>
+        </form>
+        <p class="trust"><span>✦</span> Research grounded in current web sources <span>·</span> Amazon links clearly labeled</p>
+      </section>
+      <section id="status" class="status" aria-live="polite"></section>
+      <section id="results" class="results" hidden></section>
+    </main>
+    <footer><span>© 2026 PickForMeHub</span><span>We may earn from qualifying Amazon purchases.</span></footer>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
