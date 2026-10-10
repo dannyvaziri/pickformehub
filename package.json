@@ -1,0 +1,13 @@
+{
+  "name": "pickformehub",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Amazon-focused AI buying recommendation engine for PickForMeHub.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
