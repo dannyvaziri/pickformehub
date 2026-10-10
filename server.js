@@ -47,14 +47,14 @@ function extractJson(text) {
   return JSON.parse(candidate.slice(start, end + 1));
 }
 
-const promptFor = (query) => `You are PickForMeHub, an evidence-first buying researcher.\n\nUser request: ${query}\n\nUse web search to research current information. Recommend exactly three physical products that can reasonably be purchased on Amazon.com. Do not recommend SaaS, subscriptions, services, or products that are not normally sold on Amazon. Prefer products with clear current availability and explain uncertainty. Return ONLY valid JSON in this shape: {"summary":"...","budget_note":"...","picks":[{"name":"...","label":"Best overall|Best value|Best for this use","price":"...","score":0,"why":["...","..."],"tradeoffs":["..."],"sources":[{"title":"...","url":"https://..."}]}]}. Scores must be numbers from 1 to 10. Never invent a URL; omit a source URL you cannot verify.`;
+const promptFor = (query) => `Research this Amazon shopping request using web search: ${query}\nReturn ONLY compact valid JSON with exactly 3 physical Amazon products, no services: {"summary":"short","budget_note":"short","picks":[{"name":"product","label":"Best overall|Best value|Best for this use","price":"price or unknown","score":8,"why":"short reason","tradeoffs":"short caveat"}]}. Scores are 1-10. Do not include markdown, citations, or extra keys.`;
 
 async function requestGroq(prompt) {
   if (!process.env.GROQ_API_KEY) throw new Error("GROQ_API_KEY is not configured");
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${process.env.GROQ_API_KEY}` },
-    body: JSON.stringify({ model: groqModel, messages: [{ role: "user", content: prompt }], tools: [{ type: "browser_search" }], tool_choice: "required", temperature: 0.2, max_completion_tokens: 1200 }),
+    body: JSON.stringify({ model: groqModel, messages: [{ role: "user", content: prompt }], tools: [{ type: "browser_search" }], tool_choice: "required", temperature: 0.2, max_completion_tokens: 800 }),
   });
   const payload = await response.json();
   if (!response.ok) throw new Error(payload?.error?.message || "Groq research request failed");
@@ -66,7 +66,7 @@ async function requestOpenRouter(prompt) {
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, "HTTP-Referer": "https://pickformehub.com", "X-Title": "PickForMeHub" },
-    body: JSON.stringify({ model: openRouterModel, messages: [{ role: "user", content: prompt }], tools: [{ type: "openrouter:web_search" }], temperature: 0.2, max_tokens: 1200 }),
+    body: JSON.stringify({ model: openRouterModel, messages: [{ role: "user", content: prompt }], tools: [{ type: "openrouter:web_search" }], temperature: 0.2, max_tokens: 800 }),
   });
   const payload = await response.json();
   if (!response.ok) throw new Error(payload?.error?.message || "OpenRouter research request failed");
