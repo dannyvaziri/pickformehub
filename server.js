@@ -7,7 +7,7 @@ const root = fileURLToPath(new URL(".", import.meta.url));
 const publicDir = join(root, "public");
 const port = Number(process.env.PORT || 3000);
 const associateTag = process.env.AMAZON_ASSOCIATE_TAG || "pickformehub-20";
-const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
 const mime = {
   ".html": "text/html; charset=utf-8",
