@@ -7,7 +7,8 @@ const root = fileURLToPath(new URL(".", import.meta.url));
 const publicDir = join(root, "public");
 const port = Number(process.env.PORT || 3000);
 const associateTag = process.env.AMAZON_ASSOCIATE_TAG || "pickformehub-20";
-const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+const groqModel = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
+const openRouterModel = process.env.OPENROUTER_MODEL || "openai/gpt-oss-20b:free";
 
 const mime = {
   ".html": "text/html; charset=utf-8",
@@ -46,27 +47,41 @@ function extractJson(text) {
   return JSON.parse(candidate.slice(start, end + 1));
 }
 
-async function research(query) {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("AI research is not configured yet. Add GEMINI_API_KEY in Hostinger.");
-  }
+const promptFor = (query) => `You are PickForMeHub, an evidence-first buying researcher.\n\nUser request: ${query}\n\nUse web search to research current information. Recommend exactly three physical products that can reasonably be purchased on Amazon.com. Do not recommend SaaS, subscriptions, services, or products that are not normally sold on Amazon. Prefer products with clear current availability and explain uncertainty. Return ONLY valid JSON in this shape: {"summary":"...","budget_note":"...","picks":[{"name":"...","label":"Best overall|Best value|Best for this use","price":"...","score":0,"why":["...","..."],"tradeoffs":["..."],"sources":[{"title":"...","url":"https://..."}]}]}. Scores must be numbers from 1 to 10. Never invent a URL; omit a source URL you cannot verify.`;
 
-  const prompt = `You are PickForMeHub, an evidence-first buying researcher.\n\nUser request: ${query}\n\nResearch current information with web search. Recommend exactly three physical products that can reasonably be purchased on Amazon.com. Do not recommend SaaS, subscriptions, services, or products that are not normally sold on Amazon. Prefer products with clear current availability and explain uncertainty. Return ONLY valid JSON in this shape: {"summary":"...","budget_note":"...","picks":[{"name":"...","label":"Best overall|Best value|Best for this use","price":"...","score":0,"why":["...","..."],"tradeoffs":["..."],"sources":[{"title":"...","url":"https://..."}]}]}. Scores must be numbers from 1 to 10. Never invent a URL; omit a source URL you cannot verify.`;
-
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+async function requestGroq(prompt) {
+  if (!process.env.GROQ_API_KEY) throw new Error("GROQ_API_KEY is not configured");
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
-    headers: { "content-type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      tools: [{ google_search: {} }],
-      generationConfig: { temperature: 0.2, responseMimeType: "application/json" },
-    }),
+    headers: { "content-type": "application/json", authorization: `Bearer ${process.env.GROQ_API_KEY}` },
+    body: JSON.stringify({ model: groqModel, messages: [{ role: "user", content: prompt }], tools: [{ type: "browser_search" }], tool_choice: "required", temperature: 0.2, max_completion_tokens: 2400 }),
   });
-
   const payload = await response.json();
-  if (!response.ok) throw new Error(payload?.error?.message || "The AI research request failed");
-  const text = payload?.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("") || "";
-  const result = extractJson(text);
+  if (!response.ok) throw new Error(payload?.error?.message || "Groq research request failed");
+  return extractJson(payload?.choices?.[0]?.message?.content || "");
+}
+
+async function requestOpenRouter(prompt) {
+  if (!process.env.OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY is not configured");
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, "HTTP-Referer": "https://pickformehub.com", "X-Title": "PickForMeHub" },
+    body: JSON.stringify({ model: openRouterModel, messages: [{ role: "user", content: prompt }], tools: [{ type: "openrouter:web_search" }], temperature: 0.2 }),
+  });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload?.error?.message || "OpenRouter research request failed");
+  return extractJson(payload?.choices?.[0]?.message?.content || "");
+}
+
+async function research(query) {
+  const prompt = promptFor(query);
+  let result;
+  const errors = [];
+  try { result = await requestGroq(prompt); } catch (error) { errors.push(`Groq: ${error.message}`); }
+  if (!result) {
+    try { result = await requestOpenRouter(prompt); } catch (error) { errors.push(`OpenRouter: ${error.message}`); }
+  }
+  if (!result) throw new Error(`No research provider is available. ${errors.join(" ")}`);
   result.picks = Array.isArray(result.picks) ? result.picks.slice(0, 3).map((pick) => ({
     ...pick,
     score: Math.max(1, Math.min(10, Number(pick.score) || 0)),
