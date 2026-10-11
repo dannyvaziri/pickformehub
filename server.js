@@ -9,6 +9,7 @@ const port = Number(process.env.PORT || 3000);
 const associateTag = process.env.AMAZON_ASSOCIATE_TAG || "pickformehub-20";
 const groqModel = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
 const openRouterModel = process.env.OPENROUTER_MODEL || "openrouter/free";
+const searchIndex = new Map();
 
 const mime = {
   ".html": "text/html; charset=utf-8",
@@ -46,6 +47,21 @@ function extractJson(text) {
   if (start < 0 || end <= start) throw new Error("The research provider returned an invalid result");
   return JSON.parse(candidate.slice(start, end + 1));
 }
+function fallbackResult(query, errors) {
+  const variants = [
+    ["Best overall", `${query} best overall`],
+    ["Best value", `${query} best value`],
+    ["Best for this use", `${query} highly rated`],
+  ];
+  return {
+    summary: "Here are Amazon search options for your request. Live AI research is temporarily unavailable, so verify current prices and reviews before buying.",
+    budget_note: "Amazon results and prices can change.",
+    picks: variants.map(([label, name]) => ({ name, label, price: "Check current price", score: 0, why: "Search results matched to your request", tradeoffs: "Review current ratings and specifications" })),
+    provider: "amazon-search-fallback",
+    providerNotice: errors.join(" "),
+  };
+}
+
 
 const promptFor = (query) => `Research this Amazon shopping request using web search: ${query}\nReturn ONLY compact valid JSON with exactly 3 physical Amazon products, no services: {"summary":"short","budget_note":"short","picks":[{"name":"product","label":"Best overall|Best value|Best for this use","price":"price or unknown","score":8,"why":"short reason","tradeoffs":"short caveat"}]}. Scores are 1-10. Do not include markdown, citations, or extra keys.`;
 
@@ -67,6 +83,7 @@ async function requestOpenRouter(prompt) {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, "HTTP-Referer": "https://pickformehub.com", "X-Title": "PickForMeHub" },
     body: JSON.stringify({ model: openRouterModel, messages: [{ role: "user", content: prompt }], tools: [{ type: "openrouter:web_search" }], temperature: 0.2, max_tokens: 800 }),
+    signal: AbortSignal.timeout(25000),
   });
   const payload = await response.json();
   if (!response.ok) throw new Error(payload?.error?.message || "OpenRouter research request failed");
@@ -74,6 +91,8 @@ async function requestOpenRouter(prompt) {
 }
 
 async function research(query) {
+  const indexKey = query.toLowerCase().replace(/\\s+/g, " ").trim();
+  if (searchIndex.has(indexKey)) return { ...searchIndex.get(indexKey), cached: true };
   const prompt = promptFor(query);
   let result;
   const errors = [];
@@ -81,7 +100,7 @@ async function research(query) {
   if (!result) {
     try { result = await requestOpenRouter(prompt); } catch (error) { errors.push(`OpenRouter: ${error.message}`); }
   }
-  if (!result) throw new Error(`No research provider is available. ${errors.join(" ")}`);
+  if (!result) result = fallbackResult(query, errors);
   result.picks = Array.isArray(result.picks) ? result.picks.slice(0, 3).map((pick) => ({
     ...pick,
     score: Math.max(1, Math.min(10, Number(pick.score) || 0)),
@@ -89,6 +108,7 @@ async function research(query) {
   })) : [];
   result.researchedAt = new Date().toISOString();
   result.affiliateDisclosure = "We may earn a commission from qualifying Amazon purchases. This does not influence our rankings.";
+  searchIndex.set(indexKey, result);
   return result;
 }
 
