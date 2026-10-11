@@ -3,28 +3,32 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Tell PickForMeHub what you want to buy and get three evidence-backed Amazon picks." />
-    <title>PickForMeHub — Find Your Best Amazon Pick</title>
+    <meta name="description" content="Build a better home office with clear, practical Amazon product picks for your budget and work style." />
+    <title>PickForMeHub — Build a better work setup</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <header class="nav"><a class="brand" href="/">PICK<span>FOR</span>ME</a><span class="nav-note">Research first. Pick faster.</span></header>
+    <header class="nav"><a class="brand" href="/">PICK<span>FOR</span>ME</a><nav><a href="#how-it-works">How it works</a><a href="#setup-paths">Setup paths</a></nav><span class="nav-note">Amazon buying advisor</span></header>
     <main>
       <section class="hero">
-        <p class="eyebrow">AMAZON BUYING RESEARCH</p>
-        <h1>Tell us what you need.<br /><em>We’ll find your pick.</em></h1>
-        <p class="lede">Describe the product, budget, and person you’re shopping for. Our research assistant checks current information and returns three clear Amazon options.</p>
+        <div class="hero-copy"><p class="eyebrow">YOUR PRACTICAL WORKSPACE ADVISOR</p><h1>Build a setup<br /><em>that works for you.</em></h1><p class="lede">Tell us what you do, what you can spend, and what is getting in your way. We’ll narrow Amazon’s endless options into a short list you can actually use.</p></div>
         <form id="research-form" class="search-card">
-          <label for="query">What are you trying to buy?</label>
-          <textarea id="query" maxlength="500" placeholder="Best noise-canceling headphones under $200 for a frequent flyer" required></textarea>
-          <div class="form-row"><div class="chips"><button type="button" data-query="Best laptop for college under $900">Laptop under $900</button><button type="button" data-query="Best air fryer for a family of four">Air fryer for a family</button><button type="button" data-query="Best office chair for long work days">Office chair</button></div><button class="primary" type="submit">Find my picks <span>→</span></button></div>
+          <div class="card-kicker"><span class="step">01</span><span>Start with your situation</span></div>
+          <label for="query">What are you trying to set up or improve?</label>
+          <textarea id="query" maxlength="500" placeholder="I work from home in a small room and need a quiet setup under $1,000" required></textarea>
+          <div class="quick-label">Popular starting points</div>
+          <div class="chips"><button type="button" data-query="Build a comfortable home office under $1,000 for a laptop worker">Home office under $1,000</button><button type="button" data-query="Best monitor and dock setup for a MacBook under $500">MacBook monitor setup</button><button type="button" data-query="Best ergonomic office chair for long work days under $350">Ergonomic chair</button><button type="button" data-query="Best webcam microphone and light setup for Zoom meetings under $300">Video-call setup</button></div>
+          <button class="primary" type="submit">Build my shortlist <span>→</span></button>
+          <p class="form-note">You’ll get three clear options, tradeoffs, and Amazon links.</p>
         </form>
-        <p class="trust"><span>✦</span> Research grounded in current web sources <span>·</span> Amazon links clearly labeled</p>
+        <p class="trust"><span>✦</span> Built around your real constraints <span>·</span> Amazon links clearly labeled <span>·</span> No endless product list</p>
       </section>
       <section id="status" class="status" aria-live="polite"></section>
       <section id="results" class="results" hidden></section>
+      <section id="setup-paths" class="paths"><div><p class="eyebrow">START WITH A REAL NEED</p><h2>Good buying decisions<br /><em>start with context.</em></h2></div><div class="path-grid"><button data-query="Build a comfortable home office under $1,000 for a laptop worker"><strong>Home office</strong><span>Desk, chair, monitor, lighting, and essentials.</span> <b>→</b></button><button data-query="Best monitor and dock setup for a MacBook under $500"><strong>Monitor setup</strong><span>Connect, see clearly, and stop fighting your laptop.</span> <b>→</b></button><button data-query="Best ergonomic office chair for long work days under $350"><strong>Ergonomics</strong><span>Make long work days easier on your body.</span> <b>→</b></button><button data-query="Best webcam microphone and light setup for Zoom meetings under $300"><strong>Video calls</strong><span>Look and sound professional without overbuying.</span> <b>→</b></button></div></section>
+      <section id="how-it-works" class="how"><p class="eyebrow">HOW PICKFORME WORKS</p><div class="how-grid"><div><span>01</span><h3>Tell us the situation</h3><p>Budget, room, device, work style, and the thing you want to fix.</p></div><div><span>02</span><h3>Get a focused shortlist</h3><p>Three options: best overall, best value, and best fit for your use.</p></div><div><span>03</span><h3>Buy with confidence</h3><p>See the tradeoffs before you click through to Amazon.</p></div></div></section>
     </main>
-    <footer><span>© 2026 PickForMeHub</span><span>We may earn from qualifying Amazon purchases.</span></footer>
+    <footer><span>© 2026 PickForMeHub</span><span>As an Amazon Associate I earn from qualifying purchases.</span></footer>
     <script src="/app.js" defer></script>
   </body>
 </html>
