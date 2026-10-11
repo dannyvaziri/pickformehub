@@ -32,7 +32,7 @@ form.addEventListener("submit", async (event) => {
     if (!response.ok) throw new Error(data.error || "Research failed");
     status.className = "status success";
     status.textContent = "Your shortlist is ready.";
-    const modeNote = data.provider === "amazon-search-fallback" ? "AI research is temporarily limited, so these are targeted Amazon searches. Verify reviews, specifications, and current pricing before buying." : "";
+    const modeNote = data.provider === "curated-workspace-catalog" ? "These are curated product matches, not a paid placement. Verify current pricing, compatibility, reviews, and return terms before buying." : "";
     results.innerHTML = `<div class="result-intro"><p class="eyebrow">YOUR PICKS</p><h2>${escapeHtml(data.summary || "Three options worth considering")}</h2><p>${escapeHtml(data.budget_note || "Prices and availability can change; check Amazon for the latest details.")}</p>${modeNote ? `<p class="mode-note">${escapeHtml(modeNote)}</p>` : ""}</div><div class="pick-grid">${(data.picks || []).map(card).join("")}</div><p class="disclosure">${escapeHtml(data.affiliateDisclosure)}</p>`;
     results.hidden = false;
     results.scrollIntoView({ behavior: "smooth", block: "start" });
